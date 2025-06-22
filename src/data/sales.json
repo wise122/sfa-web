@@ -1,0 +1,17 @@
+[
+    {
+      "id": "S001",
+      "nama": "Budi Santoso",
+      "nik": "1234567890123456",
+      "alamat": "Jl. Merdeka No. 10",
+      "ttl": "1990-05-21"
+    },
+    {
+      "id": "S002",
+      "nama": "Sari Dewi",
+      "nik": "2345678901234567",
+      "alamat": "Jl. Kenanga No. 25",
+      "ttl": "1992-08-10"
+    }
+  ]
+  
