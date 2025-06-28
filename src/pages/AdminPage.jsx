@@ -3,55 +3,103 @@ import {
   Box, Container, Heading, Table, Thead, Tbody, Tr, Th, Td, Flex,
   Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter,
   ModalBody, ModalCloseButton, useDisclosure, Input, FormControl,
-  FormLabel, VStack
+  FormLabel, VStack, Select, useToast
 } from '@chakra-ui/react';
-
-const defaultAdminData = [
-  {
-    id: 'A001',
-    nama: 'Rina Hapsari',
-    nik: '5678901234567890',
-    alamat: 'Jl. Melati No. 3',
-    ttl: '1991-11-05',
-  },
-  {
-    id: 'A002',
-    nama: 'Dedi Saputra',
-    nik: '6789012345678901',
-    alamat: 'Jl. Flamboyan No. 20',
-    ttl: '1989-04-17',
-  },
-];
+import axios from 'axios';
 
 const AdminPage = () => {
-  const initialData = () => {
-    const savedData = localStorage.getItem('adminData');
-    if (savedData) {
-      return JSON.parse(savedData);
-    }
-    return defaultAdminData;
-  };
-
-  const [adminData, setAdminData] = useState(initialData);
+  const [users, setUsers] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
-  const [newAdmin, setNewAdmin] = useState({
-    id: '', nama: '', nik: '', alamat: '', ttl: ''
+  const [newUser, setNewUser] = useState({
+    user_id: '',
+    name: '',
+    segment: 'ADMIN',
+    nik: '',
+    alamat: '',
+    ttl: '',
+    email: '',
   });
 
   useEffect(() => {
-    localStorage.setItem('adminData', JSON.stringify(adminData));
-  }, [adminData]);
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/auth/users');
+      const filtered = (res.data || []).filter(
+        (u) => (u.segment || '').toUpperCase() === 'ADMIN' || (u.segment || '').toUpperCase() === 'SUPER ADMIN'
+      );
+      setUsers(filtered);
+    } catch (err) {
+      console.error('Gagal fetch users:', err);
+      toast({
+        title: 'Gagal ambil data',
+        description: 'Tidak dapat memuat data admin',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewAdmin((prev) => ({ ...prev, [name]: value }));
+    setNewUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleAddAdmin = () => {
-    setAdminData([...adminData, newAdmin]);
-    setNewAdmin({ id: '', nama: '', nik: '', alamat: '', ttl: '' });
-    onClose();
+  const handleAddUser = async () => {
+    if (!newUser.user_id || !newUser.name) {
+      toast({
+        title: 'Input tidak lengkap',
+        description: 'User ID dan Nama wajib diisi',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      await axios.post('http://localhost:5000/api/auth/users', {
+        ...newUser,
+        call: 0,
+        totalSales: 0,
+      });
+
+      toast({
+        title: 'Admin berhasil ditambahkan',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
+      onClose();
+      setNewUser({
+        user_id: '',
+        name: '',
+        segment: 'ADMIN',
+        nik: '',
+        alamat: '',
+        ttl: '',
+        email: '',
+      });
+      fetchUsers();
+    } catch (err) {
+      console.error('Gagal tambah admin:', err);
+      toast({
+        title: 'Gagal tambah admin',
+        description: 'Terjadi kesalahan saat menambah data',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -65,21 +113,25 @@ const AdminPage = () => {
         <Table size="md">
           <Thead bg="blue.500">
             <Tr>
-              <Th color="white" textAlign="center">ID Karyawan</Th>
+              <Th color="white" textAlign="center">User ID</Th>
               <Th color="white" textAlign="center">Nama</Th>
+              <Th color="white" textAlign="center">Segment</Th>
+              <Th color="white" textAlign="center">Email</Th>
               <Th color="white" textAlign="center">NIK</Th>
               <Th color="white" textAlign="center">Alamat</Th>
               <Th color="white" textAlign="center">TTL</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {adminData.map((admin, index) => (
+            {users.map((user, index) => (
               <Tr key={index}>
-                <Td textAlign="center">{admin.id}</Td>
-                <Td textAlign="center">{admin.nama}</Td>
-                <Td textAlign="center">{admin.nik}</Td>
-                <Td textAlign="center">{admin.alamat}</Td>
-                <Td textAlign="center">{admin.ttl}</Td>
+                <Td textAlign="center">{user.user_id}</Td>
+                <Td textAlign="center">{user.name}</Td>
+                <Td textAlign="center">{user.segment}</Td>
+                <Td textAlign="center">{user.email}</Td>
+                <Td textAlign="center">{user.nik}</Td>
+                <Td textAlign="center">{user.alamat}</Td>
+                <Td textAlign="center">{user.ttl}</Td>
               </Tr>
             ))}
           </Tbody>
@@ -90,38 +142,51 @@ const AdminPage = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Tambah Admin Baru</ModalHeader>
+          <ModalHeader>Tambah Admin / Super Admin</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
               <FormControl isRequired>
-                <FormLabel>ID Karyawan</FormLabel>
-                <Input name="id" value={newAdmin.id} onChange={handleInputChange} />
+                <FormLabel>User ID</FormLabel>
+                <Input name="user_id" value={newUser.user_id} onChange={handleInputChange} />
               </FormControl>
               <FormControl isRequired>
                 <FormLabel>Nama</FormLabel>
-                <Input name="nama" value={newAdmin.nama} onChange={handleInputChange} />
+                <Input name="name" value={newUser.name} onChange={handleInputChange} />
               </FormControl>
               <FormControl isRequired>
+                <FormLabel>Segment</FormLabel>
+                <Select name="segment" value={newUser.segment} onChange={handleInputChange}>
+                  <option value="ADMIN">Admin</option>
+                  <option value="SUPER ADMIN">Super Admin</option>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <FormLabel>Email</FormLabel>
+                <Input name="email" value={newUser.email} onChange={handleInputChange} />
+              </FormControl>
+              <FormControl>
                 <FormLabel>NIK</FormLabel>
-                <Input name="nik" value={newAdmin.nik} onChange={handleInputChange} />
+                <Input name="nik" value={newUser.nik} onChange={handleInputChange} />
               </FormControl>
-              <FormControl isRequired>
+              <FormControl>
                 <FormLabel>Alamat</FormLabel>
-                <Input name="alamat" value={newAdmin.alamat} onChange={handleInputChange} />
+                <Input name="alamat" value={newUser.alamat} onChange={handleInputChange} />
               </FormControl>
-              <FormControl isRequired>
+              <FormControl>
                 <FormLabel>TTL</FormLabel>
-                <Input name="ttl" value={newAdmin.ttl} onChange={handleInputChange} placeholder="YYYY-MM-DD" />
+                <Input name="ttl" value={newUser.ttl} onChange={handleInputChange} placeholder="YYYY-MM-DD" />
               </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleAddAdmin}>
+            <Button colorScheme="blue" mr={3} onClick={handleAddUser}>
               Simpan
             </Button>
-            <Button variant="ghost" onClick={onClose}>Batal</Button>
+            <Button variant="ghost" onClick={onClose}>
+              Batal
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -2,41 +2,19 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Input, Button, Heading, Flex,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody,
-  ModalCloseButton, useDisclosure, FormControl, FormLabel, VStack, useColorModeValue
+  ModalCloseButton, useDisclosure, FormControl, FormLabel, VStack, useColorModeValue, useToast
 } from '@chakra-ui/react';
+import axios from 'axios';
 
-const defaultProducts = [
-  {
-    code: 'P001',
-    name: 'SANDJAYA COKLAT',
-    hpp: 5000,
-    stokAwalTotal: 100,
-    stokAwalSales: 30,
-    hargaRetail: 8000,
-    hargaWS: 7500,
-    hargaAgen: 7000,
-    stokAkhirSales: 20,
-    totalStokAkhir: 90,
-  },
-  {
-    code: 'P002',
-    name: 'SHANZY MANGGA',
-    hpp: 4500,
-    stokAwalTotal: 120,
-    stokAwalSales: 40,
-    hargaRetail: 7800,
-    hargaWS: 7400,
-    hargaAgen: 6900,
-    stokAkhirSales: 25,
-    totalStokAkhir: 95,
-  },
-  // Data lainnya...
-];
+// Contoh segment bisa dari props / context / localStorage
+const userSegment = 'ADMIN'; // ganti misal 'SUPER ADMIN' atau yang lain
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+
   const headerBg = useColorModeValue('gray.100', 'gray.700');
 
   const [newProduct, setNewProduct] = useState({
@@ -45,24 +23,31 @@ const ProductList = () => {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('products');
-    if (saved) {
-      setProducts(JSON.parse(saved));
-    } else {
-      setProducts(defaultProducts);
-    }
+    fetchProducts();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products));
-  }, [products]);
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/products');
+      setProducts(res.data || []);
+    } catch (err) {
+      console.error('Gagal fetch produk:', err);
+      toast({
+        title: 'Gagal ambil data',
+        description: 'Tidak dapat memuat data produk',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     const formattedProduct = {
       ...newProduct,
       hpp: parseInt(newProduct.hpp),
@@ -74,12 +59,31 @@ const ProductList = () => {
       stokAkhirSales: parseInt(newProduct.stokAkhirSales),
       totalStokAkhir: parseInt(newProduct.totalStokAkhir),
     };
-    setProducts([...products, formattedProduct]);
-    setNewProduct({
-      code: '', name: '', hpp: '', stokAwalTotal: '', stokAwalSales: '',
-      hargaRetail: '', hargaWS: '', hargaAgen: '', stokAkhirSales: '', totalStokAkhir: ''
-    });
-    onClose();
+
+    try {
+      await axios.post('https://sal.notespad.xyz/api/products', formattedProduct);
+      toast({
+        title: 'Produk berhasil ditambahkan',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+      setNewProduct({
+        code: '', name: '', hpp: '', stokAwalTotal: '', stokAwalSales: '',
+        hargaRetail: '', hargaWS: '', hargaAgen: '', stokAkhirSales: '', totalStokAkhir: ''
+      });
+      fetchProducts();
+    } catch (err) {
+      console.error('Gagal tambah produk:', err);
+      toast({
+        title: 'Gagal tambah produk',
+        description: 'Terjadi kesalahan saat menambah data',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const filteredProducts = products.filter((product) =>
@@ -108,7 +112,7 @@ const ProductList = () => {
             <Tr>
               <Th textAlign="center">Kode</Th>
               <Th textAlign="center">Nama Produk</Th>
-              <Th textAlign="center">HPP</Th>
+              {userSegment === 'SUPER ADMIN' && <Th textAlign="center">HPP</Th>}
               <Th textAlign="center">Stok Awal Total</Th>
               <Th textAlign="center">Stok Awal Sales</Th>
               <Th textAlign="center">Harga Retail</Th>
@@ -123,7 +127,9 @@ const ProductList = () => {
               <Tr key={index}>
                 <Td textAlign="center">{product.code}</Td>
                 <Td textAlign="center">{product.name}</Td>
-                <Td textAlign="center">{product.hpp.toLocaleString()}</Td>
+                {userSegment === 'SUPER ADMIN' && (
+                  <Td textAlign="center">{product.hpp.toLocaleString()}</Td>
+                )}
                 <Td textAlign="center">{product.stokAwalTotal}</Td>
                 <Td textAlign="center">{product.stokAwalSales}</Td>
                 <Td textAlign="center">{product.hargaRetail.toLocaleString()}</Td>
@@ -137,7 +143,6 @@ const ProductList = () => {
         </Table>
       </Box>
 
-      {/* Modal Tambah Produk */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -145,17 +150,26 @@ const ProductList = () => {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={3}>
-              {Object.keys(newProduct).map((key) => (
-                <FormControl key={key} isRequired>
-                  <FormLabel>{key.toUpperCase()}</FormLabel>
-                  <Input
-                    name={key}
-                    value={newProduct[key]}
-                    onChange={handleInputChange}
-                    type={['hpp','stokAwalTotal','stokAwalSales','hargaRetail','hargaWS','hargaAgen','stokAkhirSales','totalStokAkhir'].includes(key) ? 'number' : 'text'}
-                  />
-                </FormControl>
-              ))}
+              {Object.keys(newProduct).map((key) => {
+                if (key === 'hpp' && userSegment !== 'SUPER ADMIN') {
+                  return null; // sembunyikan field HPP
+                }
+                return (
+                  <FormControl key={key} isRequired>
+                    <FormLabel>{key.toUpperCase()}</FormLabel>
+                    <Input
+                      name={key}
+                      value={newProduct[key]}
+                      onChange={handleInputChange}
+                      type={
+                        ['hpp', 'stokAwalTotal', 'stokAwalSales', 'hargaRetail',
+                        'hargaWS', 'hargaAgen', 'stokAkhirSales', 'totalStokAkhir'].includes(key) 
+                        ? 'number' : 'text'
+                      }
+                    />
+                  </FormControl>
+                );
+              })}
             </VStack>
           </ModalBody>
 

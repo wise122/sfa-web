@@ -1,21 +1,30 @@
 import React from 'react';
-import { Box, VStack, Text, Icon, Link, Divider } from '@chakra-ui/react';
+import { Box, VStack, Text, Icon, Link, Divider, Button, Flex } from '@chakra-ui/react';
 import {
   InfoIcon,
   StarIcon,
   AtSignIcon,
   CalendarIcon,
-  ViewIcon,
-  EditIcon,
-  AddIcon,
   PhoneIcon,
   SettingsIcon,
   DownloadIcon,
+  UnlockIcon,
 } from '@chakra-ui/icons';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
-    <Box
+    <Flex
+      direction="column"
       position="fixed"
       left="0"
       top="0"
@@ -26,41 +35,48 @@ const Sidebar = () => {
       px="4"
       py="6"
       boxShadow="lg"
-      overflowY="auto" // agar bisa discroll
+      overflowY="auto"
     >
       <Text fontSize="2xl" fontWeight="bold" mb="6" textAlign="center">
         SF Web
       </Text>
 
-      <VStack align="start" spacing={2}>
-        {/* Produk */}
+      <VStack align="start" spacing="2" flex="1">
         <Section title="Data Produk">
           <NavItem icon={InfoIcon} label="List Produk" to="/produk" />
         </Section>
 
-        {/* Karyawan */}
         <Section title="Data Karyawan">
           <NavItem icon={StarIcon} label="Sales" to="/sales" />
           <NavItem icon={AtSignIcon} label="Manajemen" to="/manajemen" />
           <NavItem icon={CalendarIcon} label="Admin" to="/admin" />
         </Section>
 
-        {/* Toko */}
         <Section title="Data Toko">
           <NavItem icon={PhoneIcon} label="List Toko" to="/toko" />
         </Section>
 
-        {/* Penjualan */}
         <Section title="Data Penjualan">
           <NavItem icon={DownloadIcon} label="Tarik Data" to="/penjualan" />
         </Section>
 
-        {/* Setting */}
         <Section title="Program Berjalan">
           <NavItem icon={SettingsIcon} label="Setting Program" to="/setting-program" />
         </Section>
       </VStack>
-    </Box>
+
+      <Button
+        leftIcon={<UnlockIcon />}
+        colorScheme="red"
+        variant="ghost"
+        width="full"
+        mt="4"
+        onClick={handleLogout}
+        _hover={{ bg: 'gray.700' }}
+      >
+        Logout
+      </Button>
+    </Flex>
   );
 };
 
@@ -69,7 +85,7 @@ const Section = ({ title, children }) => (
     <Text fontSize="sm" mt="4" mb="1" color="gray.400" fontWeight="semibold">
       {title}
     </Text>
-    <VStack align="start" spacing={1} w="full">
+    <VStack align="start" spacing="1" w="full">
       {children}
     </VStack>
     <Divider borderColor="gray.600" my="3" />

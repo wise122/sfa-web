@@ -5,21 +5,21 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (!email || !password) {
-        
+  const handleLogin = async () => {
+    if (!userId || !password) {
       toast({
         title: 'Input Error',
-        description: 'Email dan Password wajib diisi.',
+        description: 'User ID dan Password wajib diisi.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -28,28 +28,63 @@ const LoginPage = () => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email === 'sales@example.com' && password === '123456') {
-        login(); 
+
+    try {
+      const response = await axios.post('https://sal.notespad.xyz/api/login', {
+        user_id: userId.trim(),
+        password,
+      });
+
+      if (response.data?.user) {
+        const { user_id, name, segment, photoUrl } = response.data.user;
+        login({ user_id, name, segment, photoUrl });
+
         toast({
           title: 'Login Berhasil',
-          description: 'Selamat datang di SFA Sales!',
+          description: `Selamat datang ${name}!`,
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
+
         navigate('/');
       } else {
         toast({
           title: 'Login Gagal',
-          description: 'Email atau password salah.',
+          description: 'Data user tidak ditemukan.',
           status: 'error',
           duration: 3000,
           isClosable: true,
         });
       }
-    }, 1500);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        toast({
+          title: 'Login Gagal',
+          description: 'User ID atau Password salah.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Gagal login, periksa koneksi atau coba lagi nanti.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handler untuk Enter di input
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
   };
 
   return (
@@ -75,14 +110,14 @@ const LoginPage = () => {
             SFA Sales Login
           </Heading>
 
-          <FormControl id="email" isRequired>
-            <FormLabel>Email</FormLabel>
+          <FormControl id="user_id" isRequired>
+            <FormLabel>User ID</FormLabel>
             <Input
-              type="email"
-              placeholder="Masukkan email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              size="md"
+              type="text"
+              placeholder="Masukkan User ID"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </FormControl>
 
@@ -93,7 +128,7 @@ const LoginPage = () => {
               placeholder="Masukkan password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              size="md"
+              onKeyDown={handleKeyDown}
             />
           </FormControl>
 
@@ -103,7 +138,6 @@ const LoginPage = () => {
             isLoading={isLoading}
             loadingText="Logging in"
             onClick={handleLogin}
-            size="md"
             borderRadius="full"
           >
             Login
