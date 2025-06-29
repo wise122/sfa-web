@@ -28,7 +28,7 @@ const ProductList = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get('https://sal.notespad.xyz/api/products');
       setProducts(res.data || []);
     } catch (err) {
       console.error('Gagal fetch produk:', err);

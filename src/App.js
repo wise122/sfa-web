@@ -9,6 +9,11 @@ import ManajemenList from "./pages/ManagementPage";
 import AdminList from "./pages/AdminPage";
 import StoreList from "./pages/ListToko";
 import SettingProgram from "./pages/ProgramSettingPage";
+import RetailScreen from "./pages/RetailScreen";
+import WholesaleScreen from "./pages/WholesaleScreen";
+import AgenScreen from "./pages/AgenScreen";
+import DiskonPage from "./pages/DiskonPage";
+import BonusPage from "./pages/BonusPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -58,10 +63,42 @@ function Layout() {
             }
           />
           <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/toko"
             element={
               <ProtectedRoute>
                 <StoreList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/toko/retail"
+            element={
+              <ProtectedRoute>
+                <RetailScreen />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/toko/wholesale"
+            element={
+              <ProtectedRoute>
+                <WholesaleScreen />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/toko/agen"
+            element={
+              <ProtectedRoute>
+                <AgenScreen />
               </ProtectedRoute>
             }
           />
@@ -74,10 +111,18 @@ function Layout() {
             }
           />
           <Route
-            path="/admin"
+            path="/program/diskon"
             element={
               <ProtectedRoute>
-                <AdminList />
+                <DiskonPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/program/bonus"
+            element={
+              <ProtectedRoute>
+                <BonusPage />
               </ProtectedRoute>
             }
           />

@@ -37,6 +37,20 @@ const LoginPage = () => {
 
       if (response.data?.user) {
         const { user_id, name, segment, photoUrl } = response.data.user;
+
+        // Cek segment
+        if (!['super admin', 'admin'].includes(segment.toLowerCase())) {
+          toast({
+            title: 'Akses Ditolak',
+            description: 'Segment Anda tidak memiliki akses ke aplikasi ini.',
+            status: 'warning',
+            duration: 3000,
+            isClosable: true,
+          });
+          setIsLoading(false);
+          return;
+        }
+
         login({ user_id, name, segment, photoUrl });
 
         toast({
@@ -80,7 +94,6 @@ const LoginPage = () => {
     }
   };
 
-  // Handler untuk Enter di input
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleLogin();
@@ -91,7 +104,7 @@ const LoginPage = () => {
     <Flex
       w="100vw"
       minH="100dvh"
-      bgGradient="white"
+      bgGradient="linear(to-br, teal.400, teal.600)"
       justify="center"
       align="center"
       p={4}

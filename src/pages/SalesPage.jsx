@@ -28,7 +28,7 @@ const SalesPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/users');
+      const res = await axios.get('https://sal.notespad.xyz/api/auth/users');
       setUsers(res.data || []);
     } catch (err) {
       console.error('Gagal fetch users:', err);
@@ -63,7 +63,7 @@ const SalesPage = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/users', {
+      await axios.post('https://sal.notespad.xyz/api/auth/users', {
         ...newUser,
         call: 0,
         totalSales: 0,
