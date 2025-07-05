@@ -28,7 +28,7 @@ const AdminPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/users');
+      const res = await axios.get('https://sal.notespad.xyz/api/auth/users');
       const filtered = (res.data || []).filter(
         (u) => (u.segment || '').toUpperCase() === 'ADMIN' || (u.segment || '').toUpperCase() === 'SUPER ADMIN'
       );
@@ -66,7 +66,7 @@ const AdminPage = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/users', {
+      await axios.post('https://sal.notespad.xyz/api/auth/users', {
         ...newUser,
         call: 0,
         totalSales: 0,

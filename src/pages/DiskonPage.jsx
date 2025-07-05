@@ -30,7 +30,7 @@ const DiskonPage = () => {
   const fetchDiskon = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/diskon');
+      const res = await axios.get('https://sal.notespad.xyz/api/diskon');
       setDiskonList(res.data);
     } catch (err) {
       console.error('Gagal load diskon:', err);
@@ -41,7 +41,7 @@ const DiskonPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get('https://sal.notespad.xyz/api/products');
       setProductList(res.data);
     } catch (err) {
       console.error('Gagal load produk:', err);
@@ -66,7 +66,7 @@ const DiskonPage = () => {
       };
 
       if (isEdit) {
-        await axios.put(`http://localhost:5000/api/diskon/${formData.id}`, payload);
+        await axios.put(`https://sal.notespad.xyz/api/diskon/${formData.id}`, payload);
         toast({ title: 'Diskon diperbarui', status: 'success', duration: 3000, isClosable: true });
       } else {
         await axios.post('http://localhost:5000api/diskon', payload);
@@ -83,7 +83,7 @@ const DiskonPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin hapus diskon ini?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/diskon/${id}`);
+      await axios.delete(`https://sal.notespad.xyz/api/diskon/${id}`);
       toast({ title: 'Diskon dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchDiskon();
     } catch (err) {
@@ -101,7 +101,7 @@ const DiskonPage = () => {
         isActive: !item.isActive,
         productId: item.productId
       };
-      await axios.put(`http://localhost:5000/api/diskon/${item._id || item.id}`, payload);
+      await axios.put(`https://sal.notespad.xyz/api/diskon/${item._id || item.id}`, payload);
       fetchDiskon();
     } catch (err) {
       console.error('Error update status:', err);

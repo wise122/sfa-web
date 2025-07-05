@@ -14,7 +14,7 @@ const PenjualanScreen = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://localhost:5000/api/orders/');
+      const response = await axios.get('https://sal.notespad.xyz/api/orders/');
       const data = response.data;
       if (data.orders && Array.isArray(data.orders)) {
         setOrders(data.orders);

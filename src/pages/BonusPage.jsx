@@ -30,7 +30,7 @@ const BonusPage = () => {
   const fetchBonus = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/bonus');
+      const res = await axios.get('https://sal.notespad.xyz/api/bonus');
       setBonusList(res.data);
     } catch (err) {
       console.error('Gagal load bonus:', err);
@@ -42,7 +42,7 @@ const BonusPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get('https://sal.notespad.xyz/api/products');
       setProductList(res.data);
     } catch (err) {
       console.error('Gagal load produk:', err);
@@ -66,10 +66,10 @@ const BonusPage = () => {
       };
 
       if (isEdit) {
-        await axios.put(`http://localhost:5000/api/bonus/${formData.id}`, payload);
+        await axios.put(`https://sal.notespad.xyz/api/bonus/${formData.id}`, payload);
         toast({ title: 'Bonus diupdate', status: 'success', duration: 3000, isClosable: true });
       } else {
-        await axios.post('http://localhost:5000/api/bonus', payload);
+        await axios.post('https://sal.notespad.xyz/api/bonus', payload);
         toast({ title: 'Bonus ditambahkan', status: 'success', duration: 3000, isClosable: true });
       }
 
@@ -84,7 +84,7 @@ const BonusPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin hapus bonus ini?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/bonus/${id}`);
+      await axios.delete(`https://sal.notespad.xyz/api/bonus/${id}`);
       toast({ title: 'Bonus dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchBonus();
     } catch (err) {
@@ -103,7 +103,7 @@ const BonusPage = () => {
         productId: item.productId
       };
 
-      await axios.put(`http://localhost:5000/api/bonus/${item._id || item.id}`, payload);
+      await axios.put(`https://sal.notespad.xyz/api/bonus/${item._id || item.id}`, payload);
       fetchBonus();
       toast({ title: 'Status bonus diupdate', status: 'success', duration: 3000, isClosable: true });
     } catch (err) {
