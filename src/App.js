@@ -9,6 +9,7 @@ import ManajemenList from "./pages/ManagementPage";
 import AdminList from "./pages/AdminPage";
 import StoreList from "./pages/ListToko";
 import SettingProgram from "./pages/ProgramSettingPage";
+import PenjualanScreen from "./pages/PenjualanScreen";
 import RetailScreen from "./pages/RetailScreen";
 import WholesaleScreen from "./pages/WholesaleScreen";
 import AgenScreen from "./pages/AgenScreen";
@@ -51,6 +52,14 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <SalesList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/penjualan"
+            element={
+              <ProtectedRoute>
+                <PenjualanScreen />
               </ProtectedRoute>
             }
           />

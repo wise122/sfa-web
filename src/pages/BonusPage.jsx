@@ -8,13 +8,15 @@ import axios from 'axios';
 
 const BonusPage = () => {
   const [bonusList, setBonusList] = useState([]);
+  const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     id: '',
     name: '',
     description: '',
     segment: 'Retail',
-    isActive: true
+    isActive: true,
+    productId: ''
   });
   const [isEdit, setIsEdit] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -22,18 +24,28 @@ const BonusPage = () => {
 
   useEffect(() => {
     fetchBonus();
+    fetchProducts();
   }, []);
 
   const fetchBonus = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('https://sal.notespad.xyz/api/bonus');
+      const res = await axios.get('http://localhost:5000/api/bonus');
       setBonusList(res.data);
     } catch (err) {
       console.error('Gagal load bonus:', err);
       toast({ title: 'Gagal load bonus', status: 'error', duration: 3000, isClosable: true });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/products');
+      setProductList(res.data);
+    } catch (err) {
+      console.error('Gagal load produk:', err);
     }
   };
 
@@ -54,10 +66,10 @@ const BonusPage = () => {
       };
 
       if (isEdit) {
-        await axios.put(`https://sal.notespad.xyz/api/bonus/${formData.id}`, payload);
+        await axios.put(`http://localhost:5000/api/bonus/${formData.id}`, payload);
         toast({ title: 'Bonus diupdate', status: 'success', duration: 3000, isClosable: true });
       } else {
-        await axios.post('https://sal.notespad.xyz/api/bonus', payload);
+        await axios.post('http://localhost:5000/api/bonus', payload);
         toast({ title: 'Bonus ditambahkan', status: 'success', duration: 3000, isClosable: true });
       }
 
@@ -72,7 +84,7 @@ const BonusPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin hapus bonus ini?')) return;
     try {
-      await axios.delete(`https://sal.notespad.xyz/api/bonus/${id}`);
+      await axios.delete(`http://localhost:5000/api/bonus/${id}`);
       toast({ title: 'Bonus dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchBonus();
     } catch (err) {
@@ -84,13 +96,14 @@ const BonusPage = () => {
   const handleSwitch = async (item) => {
     try {
       const payload = {
-        title: item.title,
-        value: item.value,
+        name: item.name,
+        description: item.description,
         segment: item.segment,
-        isActive: !item.isActive
+        isActive: !item.isActive,
+        productId: item.productId
       };
-  
-      await axios.put(`https://sal.notespad.xyz/api/bonus/${item._id}`, payload);
+
+      await axios.put(`http://localhost:5000/api/bonus/${item._id || item.id}`, payload);
       fetchBonus();
       toast({ title: 'Status bonus diupdate', status: 'success', duration: 3000, isClosable: true });
     } catch (err) {
@@ -98,11 +111,16 @@ const BonusPage = () => {
       toast({ title: 'Gagal update status', status: 'error', duration: 3000, isClosable: true });
     }
   };
-  
-  
 
   const openEdit = (item) => {
-    setFormData(item);
+    setFormData({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      segment: item.segment,
+      isActive: item.isActive,
+      productId: item.productId || ''
+    });
     setIsEdit(true);
     onOpen();
   };
@@ -113,7 +131,8 @@ const BonusPage = () => {
       name: '',
       description: '',
       segment: 'Retail',
-      isActive: true
+      isActive: true,
+      productId: ''
     });
     setIsEdit(false);
     onOpen();
@@ -135,6 +154,7 @@ const BonusPage = () => {
                   <Text fontWeight="bold">{item.name}</Text>
                   <Text>{item.description}</Text>
                   <Text fontSize="sm" color="gray.400">Segment: {item.segment}</Text>
+                  <Text fontSize="sm" color="gray.400">Product ID: {item.productId}</Text>
                   <HStack justify="space-between" mt="2">
                     <Switch
                       isChecked={item.isActive}
@@ -192,6 +212,18 @@ const BonusPage = () => {
                 <option value="Retail">Retail</option>
                 <option value="Wholesale">Wholesale</option>
                 <option value="Agen">Agen</option>
+              </Select>
+              <Select
+                placeholder="Pilih Produk"
+                name="productId"
+                value={formData.productId}
+                onChange={handleInputChange}
+              >
+                {productList.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
               </Select>
               <HStack w="full" justify="space-between">
                 <Text>Aktif</Text>

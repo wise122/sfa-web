@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Button, Heading, VStack, Text, Spinner, Card, CardBody, Stack, Input,
   IconButton, HStack, useDisclosure, useToast, Modal, ModalOverlay, ModalContent,
-  ModalHeader, ModalBody, ModalFooter, ModalCloseButton
+  ModalHeader, ModalBody, ModalFooter, ModalCloseButton, Link
 } from '@chakra-ui/react';
-import { EditIcon, DeleteIcon, SearchIcon } from '@chakra-ui/icons';
+import { EditIcon, DeleteIcon, SearchIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -40,7 +40,7 @@ const RetailScreen = () => {
   const fetchOutlets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`https://sal.notespad.xyz/api/outlets?segment=Retail`);
+      const res = await axios.get(`http://localhost:5000/api/outlets?segment=Retail`);
       setOutlets(res.data);
     } catch (err) {
       console.error('Gagal load outlet:', err);
@@ -58,7 +58,7 @@ const RetailScreen = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('https://sal.notespad.xyz/api/outlets', formData);
+      await axios.post('http://localhost:5000/api/outlets', formData);
       toast({ title: 'Outlet berhasil ditambahkan', status: 'success', duration: 3000, isClosable: true });
       onClose();
       fetchOutlets();
@@ -78,7 +78,7 @@ const RetailScreen = () => {
     if (!deleteTarget) return;
     try {
       toast({ title: 'Menghapus outlet...', status: 'loading', duration: 2000 });
-      await axios.delete(`https://sal.notespad.xyz/api/outlets/${deleteTarget.id}`);
+      await axios.delete(`http://localhost:5000/api/outlets/${deleteTarget.id}`);
       toast({ title: 'Outlet berhasil dihapus', status: 'success', duration: 3000, isClosable: true });
       onDeleteClose();
       fetchOutlets();
@@ -94,7 +94,6 @@ const RetailScreen = () => {
     }
   };
 
-  // Pagination logic
   const filteredOutlets = outlets.filter(outlet =>
     outlet.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -147,7 +146,20 @@ const RetailScreen = () => {
                           <Text fontSize="lg" fontWeight="bold">{outlet.name}</Text>
                           <Text fontSize="sm" color="gray.600">Owner: {outlet.owner}</Text>
                           <Text fontSize="sm" color="gray.600">Alamat: {outlet.address}</Text>
-                          <Text fontSize="sm" color="gray.600">Outstanding: Rp {outlet.outstanding.toLocaleString()}</Text>
+                          <Text fontSize="sm" color="gray.600">Outstanding: Rp {outlet.outstanding?.toLocaleString() || '0'}</Text>
+                          
+                          <HStack spacing="1">
+                            <Text fontSize="sm" color="gray.600">Koordinat:</Text>
+                            <Link
+                              href={`https://www.google.com/maps/search/?api=1&query=${outlet.latitude},${outlet.longitude}`}
+                              isExternal
+                              color="teal.500"
+                              fontSize="sm"
+                            >
+                              {Number(outlet.latitude).toFixed(6)}, {Number(outlet.longitude).toFixed(6)} <ExternalLinkIcon mx="1px" />
+                            </Link>
+                          </HStack>
+                          
                           <Text fontSize="xs" color="gray.500">Segment: {outlet.segment}</Text>
                         </Box>
                         <Stack direction="row" spacing="1">
@@ -187,7 +199,6 @@ const RetailScreen = () => {
         </VStack>
       )}
 
-      {/* Pagination controls */}
       {totalPages > 1 && (
         <HStack mt="4" justify="center">
           <Button

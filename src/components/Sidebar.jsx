@@ -3,7 +3,6 @@ import { Box, VStack, Text, Icon, Link, Divider, Button, Flex } from '@chakra-ui
 import {
   Download as DownloadIcon,
   LogOut as UnlockIcon,
-  Settings as SettingsIcon,
   Store as StorefrontIcon,
   Users as UsersIcon,
   Briefcase as BriefcaseIcon,
@@ -21,7 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();  // pastikan AuthContext menyediakan user + segment
   const navigate = useNavigate();
   const [tokoOpen, setTokoOpen] = React.useState(false);
 
@@ -29,6 +28,12 @@ const Sidebar = () => {
     logout();
     navigate('/login');
   };
+
+  const isAdmin = (user?.segment || '').toLowerCase() === 'admin';
+
+
+  console.log("Sidebar - user:", user);
+  console.log("Sidebar - isAdmin:", isAdmin);
 
   return (
     <Flex
@@ -50,46 +55,50 @@ const Sidebar = () => {
       </Text>
 
       <VStack align="start" spacing="2" flex="1">
-        <Section title="Data Produk">
-          <NavItem icon={BoxIcon} label="List Produk" to="/produk" />
-        </Section>
+        {!isAdmin && (
+          <>
+            <Section title="Data Produk">
+              <NavItem icon={BoxIcon} label="List Produk" to="/produk" />
+            </Section>
 
-        <Section title="Data Karyawan">
-          <NavItem icon={UsersIcon} label="Sales" to="/sales" />
-          <NavItem icon={BriefcaseIcon} label="Manajemen" to="/manajemen" />
-          <NavItem icon={ShieldIcon} label="Admin" to="/admin" />
-        </Section>
+            <Section title="Data Karyawan">
+              <NavItem icon={UsersIcon} label="Sales" to="/sales" />
+              <NavItem icon={BriefcaseIcon} label="Manajemen" to="/manajemen" />
+              <NavItem icon={ShieldIcon} label="Admin" to="/admin" />
+            </Section>
 
-        <Section title="Data Toko">
-          <Flex
-            align="center"
-            px="3"
-            py="2"
-            w="full"
-            borderRadius="md"
-            _hover={{ bg: 'gray.700', cursor: 'pointer' }}
-            onClick={() => setTokoOpen(!tokoOpen)}
-          >
-            <Icon as={StorefrontIcon} boxSize="5" mr="3" />
-            <Text flex="1">List Toko</Text>
-            <Icon as={tokoOpen ? ChevronUp : ChevronDown} boxSize="4" />
-          </Flex>
-          {tokoOpen && (
-            <VStack align="start" pl="6" spacing="1" w="full">
-              <NavItem icon={ShoppingBagIcon} label="Retail" to="/toko/retail" small />
-              <NavItem icon={TruckIcon} label="Wholesale" to="/toko/wholesale" small />
-              <NavItem icon={HandshakeIcon} label="Agen" to="/toko/agen" small />
-            </VStack>
-          )}
-        </Section>
+            <Section title="Data Toko">
+              <Flex
+                align="center"
+                px="3"
+                py="2"
+                w="full"
+                borderRadius="md"
+                _hover={{ bg: 'gray.700', cursor: 'pointer' }}
+                onClick={() => setTokoOpen(!tokoOpen)}
+              >
+                <Icon as={StorefrontIcon} boxSize="5" mr="3" />
+                <Text flex="1">List Toko</Text>
+                <Icon as={tokoOpen ? ChevronUp : ChevronDown} boxSize="4" />
+              </Flex>
+              {tokoOpen && (
+                <VStack align="start" pl="6" spacing="1" w="full">
+                  <NavItem icon={ShoppingBagIcon} label="Retail" to="/toko/retail" small />
+                  <NavItem icon={TruckIcon} label="Wholesale" to="/toko/wholesale" small />
+                  <NavItem icon={HandshakeIcon} label="Agen" to="/toko/agen" small />
+                </VStack>
+              )}
+            </Section>
+
+            <Section title="Program Berjalan">
+              <NavItem icon={PercentIcon} label="Diskon" to="/program/diskon" />
+              <NavItem icon={GiftIcon} label="Bonus" to="/program/bonus" />
+            </Section>
+          </>
+        )}
 
         <Section title="Data Penjualan">
-          <NavItem icon={DownloadIcon} label="Tarik Data" to="/penjualan" />
-        </Section>
-
-        <Section title="Program Berjalan">
-          <NavItem icon={PercentIcon} label="Diskon" to="/program/diskon" />
-          <NavItem icon={GiftIcon} label="Bonus" to="/program/bonus" />
+          <NavItem icon={DownloadIcon} label="Laporan" to="/penjualan" />
         </Section>
       </VStack>
 

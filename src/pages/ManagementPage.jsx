@@ -27,7 +27,7 @@ const ManagementPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('https://sal.notespad.xyz/api/auth/users');
+      const res = await axios.get('http://localhost:5000/api/auth/users');
       const managementUsers = (res.data || []).filter(user => user.segment === 'MANAGEMENT');
       setUsers(managementUsers);
     } catch (err) {
@@ -63,7 +63,7 @@ const ManagementPage = () => {
     }
 
     try {
-      await axios.post('https://sal.notespad.xyz/api/auth/users', {
+      await axios.post('http://localhost:5000/api/auth/users', {
         ...newUser,
         segment: 'MANAGEMENT',
         call: 0,

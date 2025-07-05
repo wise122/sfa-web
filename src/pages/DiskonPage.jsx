@@ -8,13 +8,15 @@ import axios from 'axios';
 
 const DiskonPage = () => {
   const [diskonList, setDiskonList] = useState([]);
+  const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     id: '',
     name: '',
     value: '',
     segment: 'Retail',
-    isActive: true
+    isActive: true,
+    productId: ''
   });
   const [isEdit, setIsEdit] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -22,17 +24,27 @@ const DiskonPage = () => {
 
   useEffect(() => {
     fetchDiskon();
+    fetchProducts();
   }, []);
 
   const fetchDiskon = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('https://sal.notespad.xyz/api/diskon');
+      const res = await axios.get('http://localhost:5000/api/diskon');
       setDiskonList(res.data);
     } catch (err) {
       console.error('Gagal load diskon:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/products');
+      setProductList(res.data);
+    } catch (err) {
+      console.error('Gagal load produk:', err);
     }
   };
 
@@ -46,16 +58,20 @@ const DiskonPage = () => {
   const handleSave = async () => {
     try {
       const payload = {
-        title: formData.name,     // sesuaikan dengan schema backend
+        title: formData.name,
         value: Number(formData.value),
         segment: formData.segment,
-        isActive: formData.isActive
+        isActive: formData.isActive,
+        productId: formData.productId
       };
-  
-      console.log("Payload yang dikirim:", payload);
-  
-      await axios.post('https://sal.notespad.xyz/api/diskon', payload);
-      toast({ title: 'Diskon ditambahkan', status: 'success', duration: 3000, isClosable: true });
+
+      if (isEdit) {
+        await axios.put(`http://localhost:5000/api/diskon/${formData.id}`, payload);
+        toast({ title: 'Diskon diperbarui', status: 'success', duration: 3000, isClosable: true });
+      } else {
+        await axios.post('http://localhost:5000api/diskon', payload);
+        toast({ title: 'Diskon ditambahkan', status: 'success', duration: 3000, isClosable: true });
+      }
       onClose();
       fetchDiskon();
     } catch (err) {
@@ -63,12 +79,11 @@ const DiskonPage = () => {
       toast({ title: 'Gagal simpan diskon', status: 'error', duration: 3000, isClosable: true });
     }
   };
-  
 
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin hapus diskon ini?')) return;
     try {
-      await axios.delete(`https://sal.notespad.xyz/api/diskon/${id}`);
+      await axios.delete(`http://localhost:5000/api/diskon/${id}`);
       toast({ title: 'Diskon dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchDiskon();
     } catch (err) {
@@ -80,22 +95,28 @@ const DiskonPage = () => {
   const handleSwitch = async (item) => {
     try {
       const payload = {
-        title: item.title,  // atau name jika memang pakai name
+        title: item.title,
         value: Number(item.value),
         segment: item.segment,
-        isActive: !item.isActive
+        isActive: !item.isActive,
+        productId: item.productId
       };
-  
-      await axios.put(`https://sal.notespad.xyz/api/diskon/${item._id || item.id}`, payload);
+      await axios.put(`http://localhost:5000/api/diskon/${item._id || item.id}`, payload);
       fetchDiskon();
     } catch (err) {
       console.error('Error update status:', err);
     }
   };
-  
 
   const openEdit = (item) => {
-    setFormData(item);
+    setFormData({
+      id: item.id,
+      name: item.title,
+      value: item.value,
+      segment: item.segment,
+      isActive: item.isActive,
+      productId: item.productId || ''
+    });
     setIsEdit(true);
     onOpen();
   };
@@ -106,7 +127,8 @@ const DiskonPage = () => {
       name: '',
       value: '',
       segment: 'Retail',
-      isActive: true
+      isActive: true,
+      productId: ''
     });
     setIsEdit(false);
     onOpen();
@@ -125,8 +147,9 @@ const DiskonPage = () => {
             <Card key={item.id}>
               <CardBody>
                 <Stack spacing="1">
-                  <Text fontWeight="bold">{item.name} - {item.value}%</Text>
+                  <Text fontWeight="bold">{item.title} - {item.value}%</Text>
                   <Text fontSize="sm" color="gray.400">Segment: {item.segment}</Text>
+                  <Text fontSize="sm" color="gray.400">Product ID: {item.productId}</Text>
                   <HStack justify="space-between" mt="2">
                     <Switch
                       isChecked={item.isActive}
@@ -164,6 +187,13 @@ const DiskonPage = () => {
                 <option value="Retail">Retail</option>
                 <option value="Wholesale">Wholesale</option>
                 <option value="Agen">Agen</option>
+              </Select>
+              <Select placeholder="Pilih Produk" name="productId" value={formData.productId} onChange={handleInputChange}>
+                {productList.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
               </Select>
               <HStack w="full" justify="space-between">
                 <Text>Aktif</Text>
