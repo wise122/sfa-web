@@ -60,9 +60,11 @@ const BonusPage = () => {
   const handleSave = async () => {
     try {
       const payload = {
-        ...formData,
+        name: formData.name.trim(),
         description: formData.description.trim(),
-        name: formData.name.trim()
+        segment: formData.segment,
+        isActive: formData.isActive,
+        productId: formData.productId
       };
 
       if (isEdit) {
@@ -114,7 +116,7 @@ const BonusPage = () => {
 
   const openEdit = (item) => {
     setFormData({
-      id: item.id,
+      id: item._id || item.id,
       name: item.name,
       description: item.description,
       segment: item.segment,
@@ -148,7 +150,7 @@ const BonusPage = () => {
       ) : (
         <VStack align="stretch" spacing="3">
           {bonusList.map((item) => (
-            <Card key={item.id}>
+            <Card key={item._id || item.id}>
               <CardBody>
                 <Stack spacing="1">
                   <Text fontWeight="bold">{item.name}</Text>
@@ -165,7 +167,7 @@ const BonusPage = () => {
                     </Switch>
                     <HStack>
                       <Button size="sm" onClick={() => openEdit(item)}>Edit</Button>
-                      <Button size="sm" colorScheme="red" onClick={() => handleDelete(item.id)}>Hapus</Button>
+                      <Button size="sm" colorScheme="red" onClick={() => handleDelete(item._id || item.id)}>Hapus</Button>
                     </HStack>
                   </HStack>
                 </Stack>
@@ -185,13 +187,6 @@ const BonusPage = () => {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing="3">
-              <Input
-                placeholder="ID Bonus"
-                name="id"
-                value={formData.id}
-                onChange={handleInputChange}
-                isDisabled={isEdit}
-              />
               <Input
                 placeholder="Nama Bonus"
                 name="name"

@@ -11,12 +11,12 @@ const DiskonPage = () => {
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    id: '',
     name: '',
     value: '',
     segment: 'Retail',
     isActive: true,
-    productId: ''
+    productId: '',
+    id: ''
   });
   const [isEdit, setIsEdit] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -69,7 +69,7 @@ const DiskonPage = () => {
         await axios.put(`https://sal.notespad.xyz/api/diskon/${formData.id}`, payload);
         toast({ title: 'Diskon diperbarui', status: 'success', duration: 3000, isClosable: true });
       } else {
-        await axios.post('http://localhost:5000api/diskon', payload);
+        await axios.post('https://sal.notespad.xyz/api/diskon', payload);
         toast({ title: 'Diskon ditambahkan', status: 'success', duration: 3000, isClosable: true });
       }
       onClose();
@@ -80,10 +80,10 @@ const DiskonPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (_id) => {
     if (!window.confirm('Yakin hapus diskon ini?')) return;
     try {
-      await axios.delete(`https://sal.notespad.xyz/api/diskon/${id}`);
+      await axios.delete(`https://sal.notespad.xyz/api/diskon/${_id}`);
       toast({ title: 'Diskon dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchDiskon();
     } catch (err) {
@@ -101,7 +101,7 @@ const DiskonPage = () => {
         isActive: !item.isActive,
         productId: item.productId
       };
-      await axios.put(`https://sal.notespad.xyz/api/diskon/${item._id || item.id}`, payload);
+      await axios.put(`https://sal.notespad.xyz/api/diskon/${item._id}`, payload);
       fetchDiskon();
     } catch (err) {
       console.error('Error update status:', err);
@@ -110,7 +110,7 @@ const DiskonPage = () => {
 
   const openEdit = (item) => {
     setFormData({
-      id: item.id,
+      id: item._id,
       name: item.title,
       value: item.value,
       segment: item.segment,
@@ -144,7 +144,7 @@ const DiskonPage = () => {
       ) : (
         <VStack align="stretch" spacing="3">
           {diskonList.map((item) => (
-            <Card key={item.id}>
+            <Card key={item._id}>
               <CardBody>
                 <Stack spacing="1">
                   <Text fontWeight="bold">{item.title} - {item.value}%</Text>
@@ -160,7 +160,7 @@ const DiskonPage = () => {
                     </Switch>
                     <HStack>
                       <Button size="sm" onClick={() => openEdit(item)}>Edit</Button>
-                      <Button size="sm" colorScheme="red" onClick={() => handleDelete(item.id)}>Hapus</Button>
+                      <Button size="sm" colorScheme="red" onClick={() => handleDelete(item._id)}>Hapus</Button>
                     </HStack>
                   </HStack>
                 </Stack>
@@ -180,7 +180,6 @@ const DiskonPage = () => {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing="3">
-              <Input placeholder="ID" name="id" value={formData.id} onChange={handleInputChange} isDisabled={isEdit} />
               <Input placeholder="Nama Diskon" name="name" value={formData.name} onChange={handleInputChange} />
               <Input placeholder="Nilai (%)" name="value" value={formData.value} onChange={handleInputChange} type="number" />
               <Select name="segment" value={formData.segment} onChange={handleInputChange}>
