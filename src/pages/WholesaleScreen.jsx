@@ -36,7 +36,7 @@ const WholesaleScreen = () => {
   const fetchOutlets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/outlets?segment=Wholesale');
+      const res = await axios.get('https://sal.notespad.xyz/api/outlets?segment=Wholesale');
       setOutlets(res.data);
     } catch (err) {
       console.error('Gagal load outlet:', err);
@@ -54,7 +54,7 @@ const WholesaleScreen = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('/api/outlets', formData);
+      await axios.post('https://sal.notespad.xyz/api/outlets', formData);
       toast({
         title: 'Outlet berhasil ditambahkan',
         status: 'success',
@@ -78,7 +78,7 @@ const WholesaleScreen = () => {
   const handleDelete = async () => {
     try {
       toast({ title: 'Menghapus outlet...', status: 'loading', duration: 1000 });
-      await axios.delete(`/api/outlets/${deleteTarget.id}`);
+      await axios.delete(`https://sal.notespad.xyz/api/outlets/${deleteTarget.id}`);
       toast({
         title: 'Outlet berhasil dihapus',
         status: 'success',

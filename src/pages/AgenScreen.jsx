@@ -36,7 +36,7 @@ const AgenScreen = () => {
   const fetchOutlets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/outlets?segment=Agen');
+      const res = await axios.get('https://sal.notespad.xyz/api/outlets?segment=Agen');
       setOutlets(res.data);
     } catch (err) {
       console.error('Gagal load outlet:', err);
@@ -55,10 +55,10 @@ const AgenScreen = () => {
   const handleSubmit = async () => {
     try {
       if (formData._id) {
-        await axios.put(`/api/outlets/${formData.id}`, formData);
+        await axios.put(`https://sal.notespad.xyz/api/outlets/${formData.id}`, formData);
         toast({ title: 'Outlet berhasil diupdate', status: 'success', duration: 3000, isClosable: true });
       } else {
-        await axios.post('/api/outlets', formData);
+        await axios.post('https://sal.notespad.xyz/api/outlets', formData);
         toast({ title: 'Outlet berhasil ditambahkan', status: 'success', duration: 3000, isClosable: true });
       }
       onClose();
@@ -78,7 +78,7 @@ const AgenScreen = () => {
   const handleDelete = async () => {
     try {
       toast({ title: 'Menghapus outlet...', status: 'loading', duration: 1000 });
-      await axios.delete(`/api/outlets/${deleteTarget.id}`);
+      await axios.delete(`https://sal.notespad.xyz/api/outlets/${deleteTarget.id}`);
       toast({ title: 'Outlet berhasil dihapus', status: 'success', duration: 3000, isClosable: true });
       fetchOutlets();
       onDeleteClose();
