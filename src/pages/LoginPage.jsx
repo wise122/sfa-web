@@ -30,7 +30,7 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://sal.notespad.xyz/api/login', {
+      const response = await axios.post('https://sal.notespad.xyz/api/aut/login', {
         user_id: userId.trim(),
         password,
       });
